@@ -67,36 +67,7 @@ int main(int argc, char **argv) {
 	hints.ai_flags = 0;
 	hints.ai_protocol = 0;          // Any protocol
 
-	int gai;
-	addrinfo *result;
-	if (gai = getaddrinfo(argv[1], PORT, &hints, &result) != 0) {
-		std::cerr << "getaddrinfo: " << gai_strerror(gai) << std::endl;
-		return -1;
-	}
-
-	/*********************************************** 
-	 * We received a list of address structures
-	 * and here loop through them until a successful
-	 * connect is made
-	 ***********************************************/
-
-	for (; result != NULL; result = result->ai_next) {
-		sfd = socket(result->ai_family, result->ai_socktype,
-		             result->ai_protocol);
-		if (sfd == -1) continue; // continue if socket fail
-		if (connect(sfd, result->ai_addr, result->ai_addrlen) != -1) break; // break on success
-
-		close(sfd);
-	}
-
-	if (result == NULL) {
-		std::cerr << "Could not connect" << std::endl;
-		return -1;
-	}
-
-	freeaddrinfo(result);
-	
-	return sfd;
+	sfd = connectTo(argv[1], PORT, &hints);
 
 	if (write(sfd, p->begin(), p->size()) != p->size()) {
 		std::cerr << "partial/failed write" << std::endl;
