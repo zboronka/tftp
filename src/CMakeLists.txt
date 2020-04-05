@@ -1,2 +1,6 @@
 add_executable(server server.cxx)
 add_executable(client client.cxx)
+add_library(tftp OBJECT tftp.cxx)
+target_link_libraries(client tftp)
+target_link_libraries(server tftp)
+set_property(TARGET server client tftp PROPERTY CXX_STANDARD 17)
