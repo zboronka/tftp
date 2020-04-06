@@ -2,8 +2,6 @@
 #define TFTP_HXX
 
 namespace tftp {
-	inline const int BUFLEN = 516;
-
 	enum mode {
 		NETASCII,
 		OCTET,
@@ -54,14 +52,19 @@ namespace tftp {
 		char *errormsg;
 	};
 
-	int setUp(const char *, const char *, const addrinfo, bool);
+	class Tftp {
+		protected:
+			static const int BUFLEN = 516;
+			int sock;
+			addrinfo hints;
 
-	void sendRRQ(int, const char *, const char *);
-	void sendWRQ(int, const char *, const char *);
+		public:
+			int setUp(const char *, const char *, const addrinfo, bool);
 
-	void read(int);
+			void rd(int);
 
-	bool ignoreCaseEqual(const std::string&, const std::string&);
+			bool ignoreCaseEqual(const std::string&, const std::string&);
+	};
 }
 
 #endif

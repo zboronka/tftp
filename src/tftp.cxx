@@ -9,7 +9,7 @@
 #include "tftp.hxx"
 
 namespace tftp {
-	int setUp(const char *address, const char *port, const addrinfo hints, bool bindFlag) {
+	int Tftp::setUp(const char *address, const char *port, const addrinfo hints, bool bindFlag) {
 		int gai, sfd;
 		addrinfo *result;
 		if (gai = getaddrinfo(address, port, &hints, &result) != 0) {
@@ -25,7 +25,7 @@ namespace tftp {
 
 		for (; result != NULL; result = result->ai_next) {
 			sfd = socket(result->ai_family, result->ai_socktype,
-		             	 result->ai_protocol);
+			             result->ai_protocol);
 			if (sfd == -1) continue; // continue if socket fail
 			if(bindFlag) {
 				if (bind(sfd, result->ai_addr, result->ai_addrlen) == 0) break; // break on bind
@@ -45,39 +45,13 @@ namespace tftp {
 		return sfd;
 	}
 
-	void sendRRQ(int socket, const char *filename, const char *mode) {
-		int len_filename = std::strlen(filename);
-		int send_size = sizeof(short) + len_filename + std::strlen(mode) + 2;
-		char *rrq_packet = new char[send_size];
-
-		rrq_packet[0] = RRQ;
-		std::strcpy(rrq_packet+sizeof(short), filename);
-		std::strcpy(rrq_packet+sizeof(short)+len_filename+1, mode);
-
-		write(socket, rrq_packet, send_size);
-		delete[] rrq_packet;
-	}
-
-	void sendWRQ(int socket, const char *filename, const char *mode) {
-		int len_filename = std::strlen(filename);
-		int send_size = sizeof(short) + len_filename + std::strlen(mode) + 2;
-		char *wrq_packet = new char[send_size];
-
-		wrq_packet[0] = WRQ;
-		std::strcpy(wrq_packet+sizeof(short), filename);
-		std::strcpy(wrq_packet+sizeof(short)+len_filename+1, mode);
-
-		write(socket, wrq_packet, send_size);
-		delete[] wrq_packet;
-	}
-
-	void read(int socket) {
+	void Tftp::rd(int sock) {
 		struct sockaddr_storage peer_addr;
 		socklen_t peer_addr_len;
 		ssize_t nread;
 		char buf[516];
 		peer_addr_len = sizeof(struct sockaddr_storage);
-		nread = recvfrom(socket, buf, BUFLEN, 0,
+		nread = recvfrom(sock, buf, BUFLEN, 0,
 		                (struct sockaddr *) &peer_addr, &peer_addr_len);
 		if (nread == -1) return;
 		
@@ -102,14 +76,14 @@ namespace tftp {
 			std::cerr << "getnameinfo: " << gai_strerror(s) << std::endl;
 		}
 
-		if (sendto(socket, buf, nread, 0,
+		if (sendto(sock, buf, nread, 0,
 		           (struct sockaddr *) &peer_addr,
 		           peer_addr_len) != nread) {
 			std::cerr << "Error sending response" << std::endl;
 		}
 	}
 
-	bool ignoreCaseEqual(const std::string& a, const std::string& b) {
+	bool Tftp::ignoreCaseEqual(const std::string& a, const std::string& b) {
 		return std::equal(a.begin(), a.end(), b.begin(), [](char a, char b) {
 			return toupper(a) == toupper(b);
 		});
