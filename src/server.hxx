@@ -5,9 +5,15 @@
 
 namespace tftp {
 	class Server : public Tftp {
+		protected:
+			void sendData();
+			void sendAck();
+			void sendError(error_code);
+			ssize_t process();
+
 		public:
-			Server(const char*);
-			void r();
+			Server();
+			bool establish(const char*);
 	};
 }
 

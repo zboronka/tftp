@@ -7,16 +7,18 @@
 !_TAG_PROGRAM_URL	https://ctags.io/	/official site/
 !_TAG_PROGRAM_VERSION	0.0.0	/a3c87ab5/
 ACK	tftp.hxx	/^		ACK,$/;"	e	enum:tftp::op_code
-BUFLEN	tftp.hxx	/^			static const int BUFLEN = 516;$/;"	m	class:tftp::Tftp	typeref:typename:const int
+BUFLEN	tftp.hxx	/^			static constexpr int BUFLEN = 516;$/;"	m	class:tftp::Tftp	typeref:typename:int
 CLIENT_HXX	client.hxx	/^#define CLIENT_HXX$/;"	d
-Client	client.cxx	/^	Client::Client(const char* address, const char* port) {$/;"	f	class:tftp::Client
+Client	client.cxx	/^	Client::Client() {$/;"	f	class:tftp::Client
 Client	client.hxx	/^	class Client : public Tftp {$/;"	c	namespace:tftp
 DATA	tftp.hxx	/^		DATA,$/;"	e	enum:tftp::op_code
+DATALEN	tftp.hxx	/^			static constexpr int DATALEN = 512;$/;"	m	class:tftp::Tftp	typeref:typename:int
 DISK_FULL	tftp.hxx	/^		DISK_FULL,    \/\/ Disk full or allocation exceeded.$/;"	e	enum:tftp::error_code
 ERROR	tftp.hxx	/^		ERROR$/;"	e	enum:tftp::op_code
 FILE_EXISTS	tftp.hxx	/^		FILE_EXISTS,  \/\/ File already exists.$/;"	e	enum:tftp::error_code
 ILLEGAL_OP	tftp.hxx	/^		ILLEGAL_OP,   \/\/ Illegal TFTP operation.$/;"	e	enum:tftp::error_code
 MAIL	tftp.hxx	/^		MAIL$/;"	e	enum:tftp::mode
+MAX_STRING	tftp.hxx	/^			static constexpr int MAX_STRING = 256;$/;"	m	class:tftp::Tftp	typeref:typename:int
 NETASCII	tftp.hxx	/^		NETASCII,$/;"	e	enum:tftp::mode
 NOT_DEFINED	tftp.hxx	/^		NOT_DEFINED,  \/\/ Not defined, see error message (if any).$/;"	e	enum:tftp::error_code
 NOT_FOUND	tftp.hxx	/^		NOT_FOUND,    \/\/ File not found.$/;"	e	enum:tftp::error_code
@@ -24,7 +26,7 @@ NO_USER	tftp.hxx	/^		NO_USER       \/\/ No such user.$/;"	e	enum:tftp::error_cod
 OCTET	tftp.hxx	/^		OCTET,$/;"	e	enum:tftp::mode
 RRQ	tftp.hxx	/^		RRQ = 1,$/;"	e	enum:tftp::op_code
 SERVER_HXX	server.hxx	/^#define SERVER_HXX$/;"	d
-Server	server.cxx	/^	Server::Server(const char* port) {$/;"	f	class:tftp::Server
+Server	server.cxx	/^	Server::Server() {$/;"	f	class:tftp::Server
 Server	server.hxx	/^	class Server : public Tftp {$/;"	c	namespace:tftp
 TFTP_HXX	tftp.hxx	/^#define TFTP_HXX$/;"	d
 Tftp	tftp.hxx	/^	class Tftp {$/;"	c	namespace:tftp
@@ -33,33 +35,51 @@ VIOLATION	tftp.hxx	/^		VIOLATION,    \/\/ Access violation.$/;"	e	enum:tftp::err
 WRQ	tftp.hxx	/^		WRQ,$/;"	e	enum:tftp::op_code
 __anon4bd804c40102	tftp.cxx	/^		return std::equal(a.begin(), a.end(), b.begin(), [](char a, char b) {$/;"	f	function:tftp::Tftp::ignoreCaseEqual	file:
 ack_packet	tftp.hxx	/^	struct ack_packet {$/;"	s	namespace:tftp
-block	tftp.hxx	/^		short block;$/;"	m	struct:tftp::ack_packet	typeref:typename:short
-block	tftp.hxx	/^		short block;$/;"	m	struct:tftp::data_packet	typeref:typename:short
-buf	client.hxx	/^			char buf[BUFLEN];$/;"	m	class:tftp::Client	typeref:typename:char[]
+block	tftp.hxx	/^			uint16_t block;$/;"	m	class:tftp::Tftp	typeref:typename:uint16_t
+block	tftp.hxx	/^		uint16_t block;$/;"	m	struct:tftp::ack_packet	typeref:typename:uint16_t
+block	tftp.hxx	/^		uint16_t block;$/;"	m	struct:tftp::data_packet	typeref:typename:uint16_t
+buf	tftp.hxx	/^			char buf[BUFLEN];$/;"	m	class:tftp::Tftp	typeref:typename:char[]
 client	CMakeLists.txt	/^add_executable(client client.cxx)$/;"	t
+data	tftp.hxx	/^			char data[DATALEN];$/;"	m	class:tftp::Tftp	typeref:typename:char[]
 data	tftp.hxx	/^		char *data;$/;"	m	struct:tftp::data_packet	typeref:typename:char *
 data_packet	tftp.hxx	/^	struct data_packet {$/;"	s	namespace:tftp
-error_code	tftp.hxx	/^	enum error_code : short {$/;"	g	namespace:tftp	typeref:typename:short
+error_code	tftp.hxx	/^	enum error_code : uint16_t {$/;"	g	namespace:tftp	typeref:typename:uint16_t
 error_packet	tftp.hxx	/^	struct error_packet {$/;"	s	namespace:tftp
-errorcode	tftp.hxx	/^		short errorcode;$/;"	m	struct:tftp::error_packet	typeref:typename:short
+errorcode	tftp.hxx	/^		uint16_t errorcode;$/;"	m	struct:tftp::error_packet	typeref:typename:uint16_t
 errormsg	tftp.hxx	/^		char *errormsg;$/;"	m	struct:tftp::error_packet	typeref:typename:char *
+errors	tftp.hxx	/^	inline const char *errors[] = { "Not defined, see error message (if any).", "File not found.", /;"	v	namespace:tftp	typeref:typename:const char * []
+establish	client.cxx	/^	bool Client::establish(const char *address, const char *port) {$/;"	f	class:tftp::Client	typeref:typename:bool
+establish	server.cxx	/^	bool Server::establish(const char *port) {$/;"	f	class:tftp::Server	typeref:typename:bool
+file	tftp.hxx	/^			std::fstream file;$/;"	m	class:tftp::Tftp	typeref:typename:std::fstream
+filename	tftp.hxx	/^			char filename[MAX_STRING];$/;"	m	class:tftp::Tftp	typeref:typename:char[]
 filename	tftp.hxx	/^		char *filename;$/;"	m	struct:tftp::rw_packet	typeref:typename:char *
 hints	tftp.hxx	/^			addrinfo hints;$/;"	m	class:tftp::Tftp	typeref:typename:addrinfo
 ignoreCaseEqual	tftp.cxx	/^	bool Tftp::ignoreCaseEqual(const std::string& a, const std::string& b) {$/;"	f	class:tftp::Tftp	typeref:typename:bool
 main	client.cxx	/^int main(int argc, char **argv) {$/;"	f	typeref:typename:int
 main	server.cxx	/^int main() {$/;"	f	typeref:typename:int
+mode	tftp.hxx	/^			char mode[MAX_STRING];$/;"	m	class:tftp::Tftp	typeref:typename:char[]
 mode	tftp.hxx	/^		char *mode;$/;"	m	struct:tftp::rw_packet	typeref:typename:char *
 mode	tftp.hxx	/^	enum mode {$/;"	g	namespace:tftp
 modes	tftp.hxx	/^	inline const char *modes[] = { "NETASCII", "OCTET", "MAIL" };$/;"	v	namespace:tftp	typeref:typename:const char * []
-op_code	tftp.hxx	/^	enum op_code : short {$/;"	g	namespace:tftp	typeref:typename:short
-opcode	tftp.hxx	/^		short opcode;$/;"	m	struct:tftp::ack_packet	typeref:typename:short
-opcode	tftp.hxx	/^		short opcode;$/;"	m	struct:tftp::data_packet	typeref:typename:short
-opcode	tftp.hxx	/^		short opcode;$/;"	m	struct:tftp::error_packet	typeref:typename:short
-opcode	tftp.hxx	/^		short opcode;$/;"	m	struct:tftp::rw_packet	typeref:typename:short
-r	client.cxx	/^	ssize_t Client::r() {$/;"	f	class:tftp::Client	typeref:typename:ssize_t
-r	server.cxx	/^	void Server::r() {$/;"	f	class:tftp::Server	typeref:typename:void
-rd	tftp.cxx	/^	void Tftp::rd(int sock) {$/;"	f	class:tftp::Tftp	typeref:typename:void
+nread	tftp.hxx	/^			ssize_t nread;$/;"	m	class:tftp::Tftp	typeref:typename:ssize_t
+op_code	tftp.hxx	/^	enum op_code : uint16_t {$/;"	g	namespace:tftp	typeref:typename:uint16_t
+opcode	tftp.hxx	/^		op_code opcode = ACK;$/;"	m	struct:tftp::ack_packet	typeref:typename:op_code
+opcode	tftp.hxx	/^		op_code opcode = DATA;$/;"	m	struct:tftp::data_packet	typeref:typename:op_code
+opcode	tftp.hxx	/^		op_code opcode = ERROR;$/;"	m	struct:tftp::error_packet	typeref:typename:op_code
+opcode	tftp.hxx	/^		uint16_t opcode;$/;"	m	struct:tftp::rw_packet	typeref:typename:uint16_t
+openRead	tftp.cxx	/^	bool Tftp::openRead(const char *filename) {$/;"	f	class:tftp::Tftp	typeref:typename:bool
+openWrite	tftp.cxx	/^	bool Tftp::openWrite(const char *filename) {$/;"	f	class:tftp::Tftp	typeref:typename:bool
+peer_addr	tftp.hxx	/^			sockaddr_storage peer_addr;$/;"	m	class:tftp::Tftp	typeref:typename:sockaddr_storage
+peer_addr_len	tftp.hxx	/^			socklen_t peer_addr_len = sizeof(sockaddr_storage);$/;"	m	class:tftp::Tftp	typeref:typename:socklen_t
+process	client.cxx	/^	ssize_t Client::process() {$/;"	f	class:tftp::Client	typeref:typename:ssize_t
+process	server.cxx	/^	ssize_t Server::process() {$/;"	f	class:tftp::Server	typeref:typename:ssize_t
+processPacket	tftp.cxx	/^	void Tftp::processPacket() {$/;"	f	class:tftp::Tftp	typeref:typename:void
+readFile	tftp.cxx	/^	void Tftp::readFile() {$/;"	f	class:tftp::Tftp	typeref:typename:void
 rw_packet	tftp.hxx	/^	struct rw_packet {$/;"	s	namespace:tftp
+sendData	client.cxx	/^	void Client::sendData() {$/;"	f	class:tftp::Client	typeref:typename:void
+sendData	server.cxx	/^	void Server::sendData() {$/;"	f	class:tftp::Server	typeref:typename:void
+sendError	client.cxx	/^	void Client::sendError(error_code error) {$/;"	f	class:tftp::Client	typeref:typename:void
+sendError	server.cxx	/^	void Server::sendError(error_code error) {$/;"	f	class:tftp::Server	typeref:typename:void
 sendRRQ	client.cxx	/^	void Client::sendRRQ(const char *filename, const char *mode) {$/;"	f	class:tftp::Client	typeref:typename:void
 sendWRQ	client.cxx	/^	void Client::sendWRQ(const char *filename, const char *mode) {$/;"	f	class:tftp::Client	typeref:typename:void
 server	CMakeLists.txt	/^add_executable(server server.cxx)$/;"	t

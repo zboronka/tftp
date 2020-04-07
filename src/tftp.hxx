@@ -1,6 +1,8 @@
 #ifndef TFTP_HXX
 #define TFTP_HXX
 
+#include <fstream>
+
 namespace tftp {
 	enum mode {
 		NETASCII,
@@ -10,7 +12,7 @@ namespace tftp {
 
 	inline const char *modes[] = { "NETASCII", "OCTET", "MAIL" };
 
-	enum error_code : short {
+	enum error_code : uint16_t {
 		NOT_DEFINED,  // Not defined, see error message (if any).
 		NOT_FOUND,    // File not found.
 		VIOLATION,    // Access violation.
@@ -21,7 +23,9 @@ namespace tftp {
 		NO_USER       // No such user.
 	};
 
-	enum op_code : short {
+	inline const char *errors[] = { "Not defined, see error message (if any).", "File not found.", "Access violation.", "Disk full or allocation exceeded.", "Illegal TFTP operation.", "Unknown transfer ID.", "File already exists.", "No such user." };
+
+	enum op_code : uint16_t {
 		RRQ = 1,
 		WRQ,
 		DATA,
@@ -30,40 +34,68 @@ namespace tftp {
 	};
 
 	struct rw_packet {
-		short opcode;
+		uint16_t opcode;
 		char *filename;
 		char *mode;
 	};
 
 	struct data_packet {
-		short opcode;
-		short block;
+		op_code opcode = DATA;
+		uint16_t block;
 		char *data;
 	};
 
 	struct ack_packet {
-		short opcode;
-		short block;
+		op_code opcode = ACK;
+		uint16_t block;
 	};
 
 	struct error_packet {
-		short opcode;
-		short errorcode;
+		op_code opcode = ERROR;
+		uint16_t errorcode;
 		char *errormsg;
 	};
 
 	class Tftp {
+		private:
+			void readFile();
+
 		protected:
-			static const int BUFLEN = 516;
+			bool openRead(const char *filename); 
+			bool openWrite(const char *filename); 
+
+			virtual void sendData() = 0;
+			virtual void sendAck() = 0;
+			virtual void sendError(error_code) = 0;
+			virtual ssize_t process() = 0;
+
+			bool ignoreCaseEqual(const std::string&, const std::string&);
+
+			static constexpr int BUFLEN = 516;
+			static constexpr int DATALEN = 512;
+			static constexpr int MAX_STRING = 256;
+
+			char buf[BUFLEN];
+			char data[DATALEN];
+			char filename[MAX_STRING];
+			char mode[MAX_STRING];
+
+			sockaddr_storage peer_addr;
+			socklen_t peer_addr_len = sizeof(sockaddr_storage);
+			ssize_t nread;
+
 			int sock;
 			addrinfo hints;
+			uint16_t block;
+			bool send = false;
+			bool end = false;
+
+			std::fstream file;
 
 		public:
 			int setUp(const char *, const char *, const addrinfo, bool);
-
-			void rd(int);
-
-			bool ignoreCaseEqual(const std::string&, const std::string&);
+			void processPacket();
+			void sending();
 	};
 }
 

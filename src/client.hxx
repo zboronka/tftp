@@ -5,15 +5,18 @@
 
 namespace tftp {
 	class Client : public Tftp {
-		private:
-			char buf[BUFLEN];
+		protected:
+			void sendData();
+			void sendAck();
+			void sendError(error_code);
+			ssize_t process();
+
 		public:
-			Client(const char*, const char*);
+			Client();
+			bool establish(const char*, const char*);
 
 			void sendRRQ(const char *, const char *);
 			void sendWRQ(const char *, const char *);
-
-			ssize_t r();
 	};
 }
 

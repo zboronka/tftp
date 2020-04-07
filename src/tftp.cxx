@@ -9,6 +9,31 @@
 #include "tftp.hxx"
 
 namespace tftp {
+	void Tftp::readFile() {
+		std::strcpy(filename,buf+sizeof(uint16_t));
+		std::strcpy(mode,buf+sizeof(uint16_t)+std::strlen(filename)+1);
+	}
+
+	bool Tftp::openRead(const char *filename) {
+		file.open(filename);
+		if(!file.is_open()) {
+			sendError(NOT_FOUND);
+			return false;
+		}
+
+		return true;
+	}
+
+	bool Tftp::openWrite(const char *filename) {
+		file.open(filename);
+		if(file.is_open()) {
+			sendError(FILE_EXISTS);
+			return false;
+		}
+
+		return true;
+	}
+
 	int Tftp::setUp(const char *address, const char *port, const addrinfo hints, bool bindFlag) {
 		int gai, sfd;
 		addrinfo *result;
@@ -45,41 +70,35 @@ namespace tftp {
 		return sfd;
 	}
 
-	void Tftp::rd(int sock) {
-		struct sockaddr_storage peer_addr;
-		socklen_t peer_addr_len;
-		ssize_t nread;
-		char buf[516];
-		peer_addr_len = sizeof(struct sockaddr_storage);
-		nread = recvfrom(sock, buf, BUFLEN, 0,
-		                (struct sockaddr *) &peer_addr, &peer_addr_len);
+	void Tftp::processPacket() {
+		nread = process();
 		if (nread == -1) return;
-		
-		short a = *buf;
-		char butt[255];
-		char head[255];
-		std::strcpy(butt,buf+2);
-		std::strcpy(head,buf+sizeof(short)+std::strlen(butt)+1);
-		std::cout << a << std::endl;
-		std::cout << butt << std::endl;
-		std::cout << head << std::endl;
 
-		char host[NI_MAXHOST], service[NI_MAXSERV];
-
-		int s = getnameinfo((struct sockaddr *) &peer_addr,
-		                peer_addr_len, host, NI_MAXHOST,
-		                service, NI_MAXSERV, NI_NUMERICSERV);
-		if (s == 0) {
-			std::cout << "Received " << nread << " bytes from "
-			          << host << ":" << service << std::endl;
-		} else {
-			std::cerr << "getnameinfo: " << gai_strerror(s) << std::endl;
-		}
-
-		if (sendto(sock, buf, nread, 0,
-		           (struct sockaddr *) &peer_addr,
-		           peer_addr_len) != nread) {
-			std::cerr << "Error sending response" << std::endl;
+		uint16_t a = *buf;
+		switch(a) {
+			case RRQ:
+				readFile();
+				openRead(filename);
+				sendData();
+				send = true;
+				break;
+			case WRQ:
+				readFile();
+				openWrite(filename);
+				break;
+			case DATA:
+				block = *(buf+2);
+				std::cout << buf+4;
+				sendAck();
+				break;
+			case ACK:
+				std::cout << (uint16_t)*(buf+2) << std::endl;
+				break;
+			case ERROR:
+				std::cout << buf+2*sizeof(uint16_t) << std::endl;
+				break;
+			default:
+				return;
 		}
 	}
 
@@ -87,5 +106,11 @@ namespace tftp {
 		return std::equal(a.begin(), a.end(), b.begin(), [](char a, char b) {
 			return toupper(a) == toupper(b);
 		});
+	}
+
+	void Tftp::sending() {
+		if(send && !end) {
+			sendData();
+		}
 	}
 }
