@@ -2,6 +2,7 @@
 #define TFTP_HXX
 
 #include <fstream>
+#include <chrono>
 
 namespace tftp {
 	enum mode {
@@ -33,27 +34,10 @@ namespace tftp {
 		ERROR
 	};
 
-	struct rw_packet {
-		uint16_t opcode;
-		char *filename;
-		char *mode;
-	};
-
-	struct data_packet {
-		op_code opcode = DATA;
-		uint16_t block;
-		char *data;
-	};
-
 	struct ack_packet {
 		op_code opcode = ACK;
 		uint16_t block;
-	};
-
-	struct error_packet {
-		op_code opcode = ERROR;
-		uint16_t errorcode;
-		char *errormsg;
+		ack_packet(uint16_t block) : block(block) {}
 	};
 
 	class Tftp {
@@ -64,18 +48,32 @@ namespace tftp {
 			bool openRead(const char *filename); 
 			bool openWrite(const char *filename); 
 
-			virtual void sendData() = 0;
-			virtual void sendAck() = 0;
-			virtual void sendError(error_code) = 0;
+			virtual void deliver(const void*, int) = 0;	
+
+			void sendData();
+			void sendAck();
+			void sendError(error_code);
+
+			void receive();
+
 			virtual ssize_t process() = 0;
 
-			bool ignoreCaseEqual(const std::string&, const std::string&);
+			std::chrono::time_point<std::chrono::steady_clock> last_ack;
+			static constexpr double TIMEOUT = 0.000001; // 1 microsecond
 
-			static constexpr int BUFLEN = 516;
-			static constexpr int DATALEN = 512;
-			static constexpr int MAX_STRING = 256;
+			static const int W_T = 64;
+			uint16_t n_t = 0; // Next packet to transmit
+			uint16_t n_r = 1; // Next packet to receive
+			uint16_t n_s = 1; // Highest packet received + 1
+			uint16_t n_a = 0; // Highest ack received
 
+			static const int BUFLEN = 516;
+			static const int DATALEN = 512;
+			static const int MAX_STRING = 256;
+
+			typedef char backbuf[DATALEN];
 			char buf[BUFLEN];
+			backbuf *backbufs = new backbuf[W_T];
 			char data[DATALEN];
 			char filename[MAX_STRING];
 			char mode[MAX_STRING];
@@ -86,16 +84,18 @@ namespace tftp {
 
 			int sock;
 			addrinfo hints;
-			uint16_t block;
+			uint16_t block = 0;
 			bool send = false;
 			bool end = false;
 
 			std::fstream file;
 
 		public:
+			~Tftp() { delete[] backbufs; }
 			int setUp(const char *, const char *, const addrinfo, bool);
 			void processPacket();
 			void sending();
+			bool ignoreCaseEqual(const std::string&, const std::string&);
 	};
 }
 

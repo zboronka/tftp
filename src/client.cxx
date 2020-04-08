@@ -35,6 +35,10 @@ namespace tftp {
 
 		write(sock, rrq_packet, send_size);
 		delete[] rrq_packet;
+
+		auto fnew = std::string(filename);
+		fnew+=".back";
+		openWrite(fnew.c_str());
 	}
 
 	void Client::sendWRQ(const char *filename, const char *mode) {
@@ -50,40 +54,8 @@ namespace tftp {
 		delete[] wrq_packet;
 	}
 
-	void Client::sendData() {
-		file.seekg(block*DATALEN);
-		file.read(data, DATALEN);
-
-		auto packet_size = 2*sizeof(uint16_t)+file.gcount();
-
-		auto data_packet = new char[packet_size];
-
-		data_packet[0] = DATA;
-		data_packet[sizeof(uint16_t)] = ++block;
-		std::copy(data,data+file.gcount(),data_packet+2*sizeof(uint16_t));
-
-		write(sock, data_packet, packet_size);
-		delete[] data_packet;
-		end = file.gcount() < DATALEN || file.eof();
-	}
-
-	void Client::sendAck() {
-		ack_packet ack;
-		ack.block = block;
-		write(sock, &ack, sizeof(ack_packet));
-	}
-
-	void Client::sendError(error_code error) {
-		auto ep_size = 2*sizeof(uint16_t)+strlen(errors[error])+1;
-
-		auto error_packet = new char[ep_size];
-
-		error_packet[0] = ERROR;
-		error_packet[sizeof(uint16_t)] = error;
-		std::strcpy(error_packet+2*sizeof(uint16_t), errors[error]);
-
-		write(sock, error_packet, ep_size);
-		delete[] error_packet;
+	void Client::deliver(const void *packet, int size) {
+		write(sock, packet, size);
 	}
 
 	ssize_t Client::process() {
@@ -105,7 +77,19 @@ int main(int argc, char **argv) {
 		exit(EXIT_FAILURE);
 	}
 
-	client.sendRRQ("data.txt", tftp::modes[tftp::NETASCII]);
+	std::string command;
+	std::string filename;
+	std::cout << "Get or put: ";
+	std::cin >> command;
+	std::cout << "Filename: ";
+	std::cin >> filename;
+
+	if(client.ignoreCaseEqual(command, "GET")) {
+	   	client.sendRRQ(filename.c_str(), tftp::modes[tftp::NETASCII]);
+	} else {
+	   	client.sendWRQ(filename.c_str(), tftp::modes[tftp::NETASCII]);
+	}
+
 	for(;;) {
 		client.sending();
 		client.processPacket();

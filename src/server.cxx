@@ -29,55 +29,12 @@ namespace tftp {
 		return fcntl(sock, F_SETFL, O_NONBLOCK) >= 0;
 	}
 
-	void Server::sendData() {
-		file.seekg(block*DATALEN);
-		file.read(data, DATALEN);
-
-		auto packet_size = 2*sizeof(uint16_t)+file.gcount();
-
-		auto data_packet = new char[packet_size];
-
-		data_packet[0] = DATA;
-		data_packet[sizeof(uint16_t)] = ++block;
-		std::copy(data, data+file.gcount(), data_packet+2*sizeof(uint16_t));
-
-		if (sendto(sock, data_packet, packet_size, 0,
+	void Server::deliver(const void *packet, int size) {
+		if (sendto(sock, packet, size, 0,
 		           (sockaddr *) &peer_addr,
-		           peer_addr_len) != packet_size) {
+		           peer_addr_len) != size) {
 			std::cerr << "Error sending response" << std::endl;
 		}
-
-		delete[] data_packet;
-		end = file.gcount() < DATALEN || file.eof();
-	}
-
-	void Server::sendAck() {
-		ack_packet ack;
-		ack.block = block;
-
-		if (sendto(sock, &ack, sizeof(ack_packet), 0,
-		           (sockaddr *) &peer_addr,
-		           peer_addr_len) != sizeof(ack_packet)) {
-			std::cerr << "Error sending response" << std::endl;
-		}
-	}
-
-	void Server::sendError(error_code error) {
-		auto ep_size = 2*sizeof(uint16_t)+strlen(errors[error])+1;
-
-		auto error_packet = new char[ep_size];
-
-		error_packet[0] = ERROR;
-		error_packet[sizeof(uint16_t)] = error;
-		std::strcpy(error_packet+2*sizeof(uint16_t), errors[error]);
-
-		if (sendto(sock, error_packet, ep_size, 0,
-		           (sockaddr *) &peer_addr,
-		           peer_addr_len) != ep_size) {
-			std::cerr << "Error sending response" << std::endl;
-		}
-
-		delete[] error_packet;
 	}
 
 	ssize_t Server::process() {

@@ -15,7 +15,7 @@ namespace tftp {
 	}
 
 	bool Tftp::openRead(const char *filename) {
-		file.open(filename);
+		file.open(filename, std::ios::binary | std::ios::in);
 		if(!file.is_open()) {
 			sendError(NOT_FOUND);
 			return false;
@@ -31,7 +31,60 @@ namespace tftp {
 			return false;
 		}
 
+		file.open(filename, std::ios::binary | std::ios::out);
 		return true;
+	}
+
+	void Tftp::sendData() {
+		file.seekg(n_t*DATALEN);
+		file.read(data, DATALEN);
+
+		auto packet_size = 2*sizeof(uint16_t)+file.gcount();
+
+		auto data_packet = new char[packet_size];
+
+		*((uint16_t*)data_packet) = DATA;
+		*((uint16_t*)data_packet+1) = ++n_t;
+		std::copy(data, data+file.gcount(), data_packet+2*sizeof(uint16_t));
+
+		deliver(data_packet, packet_size);
+
+		delete[] data_packet;
+		end = file.gcount() < DATALEN || file.eof();
+	}
+
+	void Tftp::sendAck() {
+		auto ack = ack_packet(block);
+		deliver(&ack, sizeof(ack_packet));
+	}
+
+	void Tftp::sendError(error_code error) {
+		auto ep_size = 2*sizeof(uint16_t)+strlen(errors[error])+1;
+
+		auto error_packet = new char[ep_size];
+
+		*((uint16_t*)error_packet) = ERROR;
+		*((uint16_t*)error_packet+1) = error;
+		std::strcpy(error_packet+2*sizeof(uint16_t), errors[error]);
+
+		deliver(error_packet, ep_size);
+		delete[] error_packet;
+	}
+
+	void Tftp::receive() {
+		block = *((uint16_t*)buf+1);
+		if(n_r <= block && block <= n_r+W_T) {
+			if(n_r == block) {
+				n_r++;
+				file.write(buf+4, nread - 2*sizeof(uint16_t));
+				if(nread < DATALEN) {
+					file.close();
+					std::cout << "Done" << std::endl;
+				}
+			} else if(block >= n_s) {
+				n_s = block+1;
+			}
+		}
 	}
 
 	int Tftp::setUp(const char *address, const char *port, const addrinfo hints, bool bindFlag) {
@@ -74,7 +127,7 @@ namespace tftp {
 		nread = process();
 		if (nread == -1) return;
 
-		uint16_t a = *buf;
+		uint16_t a = *(uint16_t*)buf;
 		switch(a) {
 			case RRQ:
 				readFile();
@@ -87,12 +140,12 @@ namespace tftp {
 				openWrite(filename);
 				break;
 			case DATA:
-				block = *(buf+2);
-				std::cout << buf+4;
+				receive();
 				sendAck();
 				break;
 			case ACK:
-				std::cout << (uint16_t)*(buf+2) << std::endl;
+				last_ack = std::chrono::steady_clock::now();
+				n_a = *((uint16_t*)buf+1);
 				break;
 			case ERROR:
 				std::cout << buf+2*sizeof(uint16_t) << std::endl;
@@ -109,8 +162,15 @@ namespace tftp {
 	}
 
 	void Tftp::sending() {
-		if(send && !end) {
+		if(send && n_t < n_a+W_T && !end) { // If we're sending and in window
 			sendData();
+		} else if(n_t == n_a+W_T) { // Else check for timeout
+			auto current = std::chrono::steady_clock::now();
+			std::chrono::duration<double> diff = current-last_ack;
+			if(diff.count() > TIMEOUT) {
+				last_ack = current;
+				n_t = n_a;
+			}
 		}
 	}
 }

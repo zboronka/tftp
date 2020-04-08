@@ -7,18 +7,18 @@
 !_TAG_PROGRAM_URL	https://ctags.io/	/official site/
 !_TAG_PROGRAM_VERSION	0.0.0	/a3c87ab5/
 ACK	tftp.hxx	/^		ACK,$/;"	e	enum:tftp::op_code
-BUFLEN	tftp.hxx	/^			static constexpr int BUFLEN = 516;$/;"	m	class:tftp::Tftp	typeref:typename:int
+BUFLEN	tftp.hxx	/^			static const int BUFLEN = 516;$/;"	m	class:tftp::Tftp	typeref:typename:const int
 CLIENT_HXX	client.hxx	/^#define CLIENT_HXX$/;"	d
 Client	client.cxx	/^	Client::Client() {$/;"	f	class:tftp::Client
 Client	client.hxx	/^	class Client : public Tftp {$/;"	c	namespace:tftp
 DATA	tftp.hxx	/^		DATA,$/;"	e	enum:tftp::op_code
-DATALEN	tftp.hxx	/^			static constexpr int DATALEN = 512;$/;"	m	class:tftp::Tftp	typeref:typename:int
+DATALEN	tftp.hxx	/^			static const int DATALEN = 512;$/;"	m	class:tftp::Tftp	typeref:typename:const int
 DISK_FULL	tftp.hxx	/^		DISK_FULL,    \/\/ Disk full or allocation exceeded.$/;"	e	enum:tftp::error_code
 ERROR	tftp.hxx	/^		ERROR$/;"	e	enum:tftp::op_code
 FILE_EXISTS	tftp.hxx	/^		FILE_EXISTS,  \/\/ File already exists.$/;"	e	enum:tftp::error_code
 ILLEGAL_OP	tftp.hxx	/^		ILLEGAL_OP,   \/\/ Illegal TFTP operation.$/;"	e	enum:tftp::error_code
 MAIL	tftp.hxx	/^		MAIL$/;"	e	enum:tftp::mode
-MAX_STRING	tftp.hxx	/^			static constexpr int MAX_STRING = 256;$/;"	m	class:tftp::Tftp	typeref:typename:int
+MAX_STRING	tftp.hxx	/^			static const int MAX_STRING = 256;$/;"	m	class:tftp::Tftp	typeref:typename:const int
 NETASCII	tftp.hxx	/^		NETASCII,$/;"	e	enum:tftp::mode
 NOT_DEFINED	tftp.hxx	/^		NOT_DEFINED,  \/\/ Not defined, see error message (if any).$/;"	e	enum:tftp::error_code
 NOT_FOUND	tftp.hxx	/^		NOT_FOUND,    \/\/ File not found.$/;"	e	enum:tftp::error_code
@@ -29,44 +29,46 @@ SERVER_HXX	server.hxx	/^#define SERVER_HXX$/;"	d
 Server	server.cxx	/^	Server::Server() {$/;"	f	class:tftp::Server
 Server	server.hxx	/^	class Server : public Tftp {$/;"	c	namespace:tftp
 TFTP_HXX	tftp.hxx	/^#define TFTP_HXX$/;"	d
+TIMEOUT	tftp.hxx	/^			static constexpr double TIMEOUT = 0.000001; \/\/ 1 microsecond$/;"	m	class:tftp::Tftp	typeref:typename:double
 Tftp	tftp.hxx	/^	class Tftp {$/;"	c	namespace:tftp
 UNKNOWN_ID	tftp.hxx	/^		UNKNOWN_ID,   \/\/ Unknown transfer ID.$/;"	e	enum:tftp::error_code
 VIOLATION	tftp.hxx	/^		VIOLATION,    \/\/ Access violation.$/;"	e	enum:tftp::error_code
 WRQ	tftp.hxx	/^		WRQ,$/;"	e	enum:tftp::op_code
+W_T	tftp.hxx	/^			static const int W_T = 64;$/;"	m	class:tftp::Tftp	typeref:typename:const int
 __anon4bd804c40102	tftp.cxx	/^		return std::equal(a.begin(), a.end(), b.begin(), [](char a, char b) {$/;"	f	function:tftp::Tftp::ignoreCaseEqual	file:
+ack_packet	tftp.hxx	/^		ack_packet(uint16_t block) : block(block) {}$/;"	f	struct:tftp::ack_packet
 ack_packet	tftp.hxx	/^	struct ack_packet {$/;"	s	namespace:tftp
-block	tftp.hxx	/^			uint16_t block;$/;"	m	class:tftp::Tftp	typeref:typename:uint16_t
+backbuf	tftp.hxx	/^			typedef char backbuf[DATALEN];$/;"	t	class:tftp::Tftp	typeref:typename:char[DATALEN]
+backbufs	tftp.hxx	/^			backbuf *backbufs = new backbuf[W_T];$/;"	m	class:tftp::Tftp	typeref:typename:backbuf *
+block	tftp.hxx	/^			uint16_t block = 0;$/;"	m	class:tftp::Tftp	typeref:typename:uint16_t
 block	tftp.hxx	/^		uint16_t block;$/;"	m	struct:tftp::ack_packet	typeref:typename:uint16_t
-block	tftp.hxx	/^		uint16_t block;$/;"	m	struct:tftp::data_packet	typeref:typename:uint16_t
 buf	tftp.hxx	/^			char buf[BUFLEN];$/;"	m	class:tftp::Tftp	typeref:typename:char[]
 client	CMakeLists.txt	/^add_executable(client client.cxx)$/;"	t
 data	tftp.hxx	/^			char data[DATALEN];$/;"	m	class:tftp::Tftp	typeref:typename:char[]
-data	tftp.hxx	/^		char *data;$/;"	m	struct:tftp::data_packet	typeref:typename:char *
-data_packet	tftp.hxx	/^	struct data_packet {$/;"	s	namespace:tftp
+deliver	client.cxx	/^	void Client::deliver(const void *packet, int size) {$/;"	f	class:tftp::Client	typeref:typename:void
+deliver	server.cxx	/^	void Server::deliver(const void *packet, int size) {$/;"	f	class:tftp::Server	typeref:typename:void
+end	tftp.hxx	/^			bool end = false;$/;"	m	class:tftp::Tftp	typeref:typename:bool
 error_code	tftp.hxx	/^	enum error_code : uint16_t {$/;"	g	namespace:tftp	typeref:typename:uint16_t
-error_packet	tftp.hxx	/^	struct error_packet {$/;"	s	namespace:tftp
-errorcode	tftp.hxx	/^		uint16_t errorcode;$/;"	m	struct:tftp::error_packet	typeref:typename:uint16_t
-errormsg	tftp.hxx	/^		char *errormsg;$/;"	m	struct:tftp::error_packet	typeref:typename:char *
 errors	tftp.hxx	/^	inline const char *errors[] = { "Not defined, see error message (if any).", "File not found.", /;"	v	namespace:tftp	typeref:typename:const char * []
 establish	client.cxx	/^	bool Client::establish(const char *address, const char *port) {$/;"	f	class:tftp::Client	typeref:typename:bool
 establish	server.cxx	/^	bool Server::establish(const char *port) {$/;"	f	class:tftp::Server	typeref:typename:bool
 file	tftp.hxx	/^			std::fstream file;$/;"	m	class:tftp::Tftp	typeref:typename:std::fstream
 filename	tftp.hxx	/^			char filename[MAX_STRING];$/;"	m	class:tftp::Tftp	typeref:typename:char[]
-filename	tftp.hxx	/^		char *filename;$/;"	m	struct:tftp::rw_packet	typeref:typename:char *
 hints	tftp.hxx	/^			addrinfo hints;$/;"	m	class:tftp::Tftp	typeref:typename:addrinfo
 ignoreCaseEqual	tftp.cxx	/^	bool Tftp::ignoreCaseEqual(const std::string& a, const std::string& b) {$/;"	f	class:tftp::Tftp	typeref:typename:bool
+last_ack	tftp.hxx	/^			std::chrono::time_point<std::chrono::steady_clock> last_ack;$/;"	m	class:tftp::Tftp	typeref:typename:std::chrono::time_point<std::chrono::steady_clock>
 main	client.cxx	/^int main(int argc, char **argv) {$/;"	f	typeref:typename:int
 main	server.cxx	/^int main() {$/;"	f	typeref:typename:int
 mode	tftp.hxx	/^			char mode[MAX_STRING];$/;"	m	class:tftp::Tftp	typeref:typename:char[]
-mode	tftp.hxx	/^		char *mode;$/;"	m	struct:tftp::rw_packet	typeref:typename:char *
 mode	tftp.hxx	/^	enum mode {$/;"	g	namespace:tftp
 modes	tftp.hxx	/^	inline const char *modes[] = { "NETASCII", "OCTET", "MAIL" };$/;"	v	namespace:tftp	typeref:typename:const char * []
+n_a	tftp.hxx	/^			uint16_t n_a = 0; \/\/ Highest ack received$/;"	m	class:tftp::Tftp	typeref:typename:uint16_t
+n_r	tftp.hxx	/^			uint16_t n_r = 1; \/\/ Next packet to receive$/;"	m	class:tftp::Tftp	typeref:typename:uint16_t
+n_s	tftp.hxx	/^			uint16_t n_s = 1; \/\/ Highest packet received + 1$/;"	m	class:tftp::Tftp	typeref:typename:uint16_t
+n_t	tftp.hxx	/^			uint16_t n_t = 0; \/\/ Next packet to transmit$/;"	m	class:tftp::Tftp	typeref:typename:uint16_t
 nread	tftp.hxx	/^			ssize_t nread;$/;"	m	class:tftp::Tftp	typeref:typename:ssize_t
 op_code	tftp.hxx	/^	enum op_code : uint16_t {$/;"	g	namespace:tftp	typeref:typename:uint16_t
 opcode	tftp.hxx	/^		op_code opcode = ACK;$/;"	m	struct:tftp::ack_packet	typeref:typename:op_code
-opcode	tftp.hxx	/^		op_code opcode = DATA;$/;"	m	struct:tftp::data_packet	typeref:typename:op_code
-opcode	tftp.hxx	/^		op_code opcode = ERROR;$/;"	m	struct:tftp::error_packet	typeref:typename:op_code
-opcode	tftp.hxx	/^		uint16_t opcode;$/;"	m	struct:tftp::rw_packet	typeref:typename:uint16_t
 openRead	tftp.cxx	/^	bool Tftp::openRead(const char *filename) {$/;"	f	class:tftp::Tftp	typeref:typename:bool
 openWrite	tftp.cxx	/^	bool Tftp::openWrite(const char *filename) {$/;"	f	class:tftp::Tftp	typeref:typename:bool
 peer_addr	tftp.hxx	/^			sockaddr_storage peer_addr;$/;"	m	class:tftp::Tftp	typeref:typename:sockaddr_storage
@@ -75,13 +77,14 @@ process	client.cxx	/^	ssize_t Client::process() {$/;"	f	class:tftp::Client	typer
 process	server.cxx	/^	ssize_t Server::process() {$/;"	f	class:tftp::Server	typeref:typename:ssize_t
 processPacket	tftp.cxx	/^	void Tftp::processPacket() {$/;"	f	class:tftp::Tftp	typeref:typename:void
 readFile	tftp.cxx	/^	void Tftp::readFile() {$/;"	f	class:tftp::Tftp	typeref:typename:void
-rw_packet	tftp.hxx	/^	struct rw_packet {$/;"	s	namespace:tftp
-sendData	client.cxx	/^	void Client::sendData() {$/;"	f	class:tftp::Client	typeref:typename:void
-sendData	server.cxx	/^	void Server::sendData() {$/;"	f	class:tftp::Server	typeref:typename:void
-sendError	client.cxx	/^	void Client::sendError(error_code error) {$/;"	f	class:tftp::Client	typeref:typename:void
-sendError	server.cxx	/^	void Server::sendError(error_code error) {$/;"	f	class:tftp::Server	typeref:typename:void
+receive	tftp.cxx	/^	void Tftp::receive() {$/;"	f	class:tftp::Tftp	typeref:typename:void
+send	tftp.hxx	/^			bool send = false;$/;"	m	class:tftp::Tftp	typeref:typename:bool
+sendAck	tftp.cxx	/^	void Tftp::sendAck() {$/;"	f	class:tftp::Tftp	typeref:typename:void
+sendData	tftp.cxx	/^	void Tftp::sendData() {$/;"	f	class:tftp::Tftp	typeref:typename:void
+sendError	tftp.cxx	/^	void Tftp::sendError(error_code error) {$/;"	f	class:tftp::Tftp	typeref:typename:void
 sendRRQ	client.cxx	/^	void Client::sendRRQ(const char *filename, const char *mode) {$/;"	f	class:tftp::Client	typeref:typename:void
 sendWRQ	client.cxx	/^	void Client::sendWRQ(const char *filename, const char *mode) {$/;"	f	class:tftp::Client	typeref:typename:void
+sending	tftp.cxx	/^	void Tftp::sending() {$/;"	f	class:tftp::Tftp	typeref:typename:void
 server	CMakeLists.txt	/^add_executable(server server.cxx)$/;"	t
 setUp	tftp.cxx	/^	int Tftp::setUp(const char *address, const char *port, const addrinfo hints, bool bindFlag) {$/;"	f	class:tftp::Tftp	typeref:typename:int
 sock	tftp.hxx	/^			int sock;$/;"	m	class:tftp::Tftp	typeref:typename:int
@@ -92,3 +95,4 @@ tftp	server.cxx	/^namespace tftp {$/;"	n	file:
 tftp	server.hxx	/^namespace tftp {$/;"	n
 tftp	tftp.cxx	/^namespace tftp {$/;"	n	file:
 tftp	tftp.hxx	/^namespace tftp {$/;"	n
+~Tftp	tftp.hxx	/^			~Tftp() { delete[] backbufs; }$/;"	f	class:tftp::Tftp

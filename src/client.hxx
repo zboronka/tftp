@@ -6,9 +6,7 @@
 namespace tftp {
 	class Client : public Tftp {
 		protected:
-			void sendData();
-			void sendAck();
-			void sendError(error_code);
+			void deliver(const void*, int);
 			ssize_t process();
 
 		public:
