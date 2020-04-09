@@ -61,7 +61,7 @@ namespace tftp {
 			std::chrono::time_point<std::chrono::steady_clock> last_ack;
 			static constexpr double TIMEOUT = 0.000001; // 1 microsecond
 
-			static const int W_T = 64;
+			static const int W_T = 8;
 			uint16_t n_t = 0; // Next packet to transmit
 			uint16_t n_r = 1; // Next packet to receive
 			uint16_t n_s = 1; // Highest packet received + 1

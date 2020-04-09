@@ -29,7 +29,7 @@ namespace tftp {
 		int send_size = sizeof(uint16_t) + len_filename + std::strlen(mode) + 2;
 		char *rrq_packet = new char[send_size];
 
-		rrq_packet[0] = RRQ;
+		*(uint16_t*)rrq_packet = RRQ;
 		std::strcpy(rrq_packet+sizeof(uint16_t), filename);
 		std::strcpy(rrq_packet+sizeof(uint16_t)+len_filename+1, mode);
 
@@ -46,7 +46,7 @@ namespace tftp {
 		int send_size = sizeof(uint16_t) + len_filename + std::strlen(mode) + 2;
 		char *wrq_packet = new char[send_size];
 
-		wrq_packet[0] = WRQ;
+		*(uint16_t*)wrq_packet = WRQ;
 		std::strcpy(wrq_packet+sizeof(uint16_t), filename);
 		std::strcpy(wrq_packet+sizeof(uint16_t)+len_filename+1, mode);
 
