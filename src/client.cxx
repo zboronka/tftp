@@ -16,10 +16,10 @@ namespace tftp {
 		}
 
 	bool Client::establish(const char *address, const char *port) {
-			sock = setUp(address, port, hints, false);
-			if(sock == -1) {
-				return false;
-			}
+		sock = setUp(address, port, hints, false);
+		if(sock == -1) {
+			return false;
+		}
 
 		return fcntl(sock, F_SETFL, O_NONBLOCK) >= 0;
 	}

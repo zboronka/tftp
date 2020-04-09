@@ -50,11 +50,10 @@ namespace tftp {
 		deliver(data_packet, packet_size);
 
 		delete[] data_packet;
-		end = file.gcount() < DATALEN || file.eof();
 	}
 
 	void Tftp::sendAck() {
-		auto ack = ack_packet(block);
+		auto ack = ack_packet(n_r);
 		deliver(&ack, sizeof(ack_packet));
 	}
 
@@ -145,7 +144,7 @@ namespace tftp {
 				break;
 			case ACK:
 				last_ack = std::chrono::steady_clock::now();
-				n_a = *((uint16_t*)buf+1);
+				n_a = *((uint16_t*)buf+1) - 1;
 				break;
 			case ERROR:
 				std::cout << buf+2*sizeof(uint16_t) << std::endl;
@@ -162,7 +161,7 @@ namespace tftp {
 	}
 
 	void Tftp::sending() {
-		if(send && n_t < n_a+W_T && !end) { // If we're sending and in window
+		if(send && n_t < n_a+W_T && !file.eof()) { // If we're sending and in window
 			sendData();
 		} else if(n_t == n_a+W_T) { // Else check for timeout
 			auto current = std::chrono::steady_clock::now();
@@ -170,6 +169,7 @@ namespace tftp {
 			if(diff.count() > TIMEOUT) {
 				last_ack = current;
 				n_t = n_a;
+				sendData();
 			}
 		}
 	}
