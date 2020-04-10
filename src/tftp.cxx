@@ -36,8 +36,15 @@ namespace tftp {
 	}
 
 	void Tftp::sendData() {
-		file.seekg(n_t*DATALEN);
-		file.read(data, DATALEN);
+		try {
+			file.seekg(n_t*DATALEN);
+			file.read(data, DATALEN);
+			file.exceptions(std::ifstream::goodbit);
+		} catch (const std::ios_base::failure&) {
+			std::cout << "IO Exception" << std::endl;
+			send = false;
+			return;
+		}
 
 		auto packet_size = 2*sizeof(uint16_t)+file.gcount();
 
@@ -166,11 +173,16 @@ namespace tftp {
 	void Tftp::sending() {
 		if(send) {
 			if(end == n_a) {
+				std::cout << "Done sending " << end << " blocks" << std::endl;
 				send = false;
+				n_t = 0;
+				n_a = 0;
+				end = -1;
+				block = 0;
 			}
-			if(n_t < n_a+W_T && !file.eof()) { // If we're sending and in window
+			if(n_t < n_a+W_T && !file.eof() && (n_t < end || end == -1)) { // If we're sending and in window
 				sendData();
-			} else if(n_t == n_a+W_T) { // Else check for timeout
+			} else if(n_t == n_a+W_T && (n_t < end || end == -1)) { // Else check for timeout
 				auto current = std::chrono::steady_clock::now();
 				std::chrono::duration<double> diff = current-last_ack;
 				if(diff.count() > TIMEOUT) {
