@@ -50,6 +50,9 @@ namespace tftp {
 		deliver(data_packet, packet_size);
 
 		delete[] data_packet;
+		if(end == -1 && file.eof()) {
+			end = n_t;
+		}
 	}
 
 	void Tftp::sendAck() {
@@ -161,15 +164,20 @@ namespace tftp {
 	}
 
 	void Tftp::sending() {
-		if(send && n_t < n_a+W_T && !file.eof()) { // If we're sending and in window
-			sendData();
-		} else if(n_t == n_a+W_T) { // Else check for timeout
-			auto current = std::chrono::steady_clock::now();
-			std::chrono::duration<double> diff = current-last_ack;
-			if(diff.count() > TIMEOUT) {
-				last_ack = current;
-				n_t = n_a;
+		if(send) {
+			if(end == n_a) {
+				send = false;
+			}
+			if(n_t < n_a+W_T && !file.eof()) { // If we're sending and in window
 				sendData();
+			} else if(n_t == n_a+W_T) { // Else check for timeout
+				auto current = std::chrono::steady_clock::now();
+				std::chrono::duration<double> diff = current-last_ack;
+				if(diff.count() > TIMEOUT) {
+					last_ack = current;
+					n_t = n_a;
+					sendData();
+				}
 			}
 		}
 	}

@@ -86,6 +86,7 @@ namespace tftp {
 			addrinfo hints;
 			uint16_t block = 0;
 			bool send = false;
+			int end = -1;
 
 			std::fstream file;
 
