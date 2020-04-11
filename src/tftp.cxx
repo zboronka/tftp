@@ -90,8 +90,6 @@ namespace tftp {
 					file.close();
 					std::cout << "Done" << std::endl;
 				}
-			} else if(block >= n_s) {
-				n_s = block+1;
 			}
 		}
 	}
@@ -147,14 +145,17 @@ namespace tftp {
 			case WRQ:
 				readFile();
 				openWrite(filename);
+				sendAck();
 				break;
 			case DATA:
 				receive();
 				sendAck();
+				if(!file.is_open()) n_a = 1;
 				break;
 			case ACK:
 				last_ack = std::chrono::steady_clock::now();
 				n_a = *((uint16_t*)buf+1) - 1;
+				if(!n_a) send = true;
 				break;
 			case ERROR:
 				std::cout << buf+2*sizeof(uint16_t) << std::endl;
@@ -179,6 +180,7 @@ namespace tftp {
 				n_a = 0;
 				end = -1;
 				block = 0;
+				file.close();
 			}
 			if(n_t < n_a+W_T && !file.eof() && (n_t < end || end == -1)) { // If we're sending and in window
 				sendData();

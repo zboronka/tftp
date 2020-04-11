@@ -39,6 +39,9 @@ namespace tftp {
 		auto fnew = std::string(filename);
 		fnew+=".back";
 		openWrite(fnew.c_str());
+
+		is_sending = false;
+		is_receiving = true;
 	}
 
 	void Client::sendWRQ(const char *filename, const char *mode) {
@@ -52,6 +55,10 @@ namespace tftp {
 
 		write(sock, wrq_packet, send_size);
 		delete[] wrq_packet;
+		openRead(filename);
+
+		is_sending = true;
+		is_receiving = false;
 	}
 
 	void Client::deliver(const void *packet, int size) {
@@ -60,6 +67,10 @@ namespace tftp {
 
 	ssize_t Client::process() {
 		return(read(sock, buf, BUFLEN));
+	}
+
+	bool Client::done() {
+		return !file.is_open();
 	}
 }
 
@@ -89,8 +100,7 @@ int main(int argc, char **argv) {
 	} else {
 	   	client.sendWRQ(filename.c_str(), tftp::modes[tftp::NETASCII]);
 	}
-
-	for(;;) {
+	while(!client.done()) {
 		client.sending();
 		client.processPacket();
 	}

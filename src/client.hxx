@@ -5,6 +5,10 @@
 
 namespace tftp {
 	class Client : public Tftp {
+		private:
+			bool is_sending;
+			bool is_receiving;
+
 		protected:
 			void deliver(const void*, int);
 			ssize_t process();
@@ -15,6 +19,8 @@ namespace tftp {
 
 			void sendRRQ(const char *, const char *);
 			void sendWRQ(const char *, const char *);
+
+			bool done();
 	};
 }
 

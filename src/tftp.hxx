@@ -64,16 +64,13 @@ namespace tftp {
 			static const int W_T = 8;
 			uint16_t n_t = 0; // Next packet to transmit
 			uint16_t n_r = 1; // Next packet to receive
-			uint16_t n_s = 1; // Highest packet received + 1
 			uint16_t n_a = 0; // Highest ack received
 
 			static const int BUFLEN = 516;
 			static const int DATALEN = 512;
 			static const int MAX_STRING = 256;
 
-			typedef char backbuf[DATALEN];
 			char buf[BUFLEN];
-			backbuf *backbufs = new backbuf[W_T];
 			char data[DATALEN];
 			char filename[MAX_STRING];
 			char mode[MAX_STRING];
@@ -91,7 +88,6 @@ namespace tftp {
 			std::fstream file;
 
 		public:
-			~Tftp() { delete[] backbufs; }
 			int setUp(const char *, const char *, const addrinfo, bool);
 			void processPacket();
 			void sending();
