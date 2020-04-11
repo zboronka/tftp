@@ -75,12 +75,18 @@ namespace tftp {
 }
 
 int main(int argc, char **argv) {
-	const char *address;
+	const char *address = "127.0.0.1";
+	bool ipv4 = true;
+	bool drops = false;
 
-	if (argc < 2) {
-		address = "127.0.0.1";
-	} else {
-		address = argv[1];
+	for(int i = 0; i < argc; i++) {
+		if(strcmp(argv[i], "-a") == 0) {
+			address = argv[i+1];
+		} else if(strcmp(argv[i], "--ipv6") == 0) {
+			ipv4 = false;
+		} else if(strcmp(argv[i], "-d") == 0) {
+			drops = true;
+		}
 	}
 
 	auto client = tftp::Client();
