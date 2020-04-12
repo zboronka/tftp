@@ -8,6 +8,7 @@ namespace tftp {
 		private:
 			bool is_sending;
 			bool is_receiving;
+			bool drops;
 
 		protected:
 			void deliver(const void*, int);
@@ -15,7 +16,7 @@ namespace tftp {
 
 		public:
 			Client();
-			bool establish(const char*, const char*);
+			bool establish(const char*, const char*, bool);
 
 			void sendRRQ(const char *, const char *);
 			void sendWRQ(const char *, const char *);

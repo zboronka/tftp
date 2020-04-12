@@ -3,6 +3,8 @@
 
 #include <fstream>
 #include <chrono>
+#include <unordered_map>
+#include <vector>
 
 namespace tftp {
 	enum mode {
@@ -59,7 +61,7 @@ namespace tftp {
 			virtual ssize_t process() = 0;
 
 			std::chrono::time_point<std::chrono::steady_clock> last_ack;
-			static constexpr double TIMEOUT = 0.000001; // 1 microsecond
+			static constexpr double TIMEOUT = 0.050; // 50 milliseconds
 
 			static const int W_T = 8;
 			uint16_t n_t = 0; // Next packet to transmit
@@ -71,6 +73,7 @@ namespace tftp {
 			static const int MAX_STRING = 256;
 
 			char buf[BUFLEN];
+			std::unordered_map<int, std::vector<char>> backbuf;
 			char data[DATALEN];
 			char filename[MAX_STRING];
 			char mode[MAX_STRING];

@@ -15,7 +15,8 @@ namespace tftp {
 			hints.ai_protocol = 0;          // Any protocol
 		}
 
-	bool Client::establish(const char *address, const char *port) {
+	bool Client::establish(const char *address, const char *port, bool drop) {
+		drops = drop;
 		sock = setUp(address, port, hints, false);
 		if(sock == -1) {
 			return false;
@@ -62,7 +63,9 @@ namespace tftp {
 	}
 
 	void Client::deliver(const void *packet, int size) {
-		write(sock, packet, size);
+		if(!drops || rand() % 100) {
+			write(sock, packet, size);
+		}
 	}
 
 	ssize_t Client::process() {
@@ -90,7 +93,7 @@ int main(int argc, char **argv) {
 	}
 
 	auto client = tftp::Client();
-	if(!client.establish(address, "2830")) {
+	if(!client.establish(address, "2830", drops)) {
 		exit(EXIT_FAILURE);
 	}
 

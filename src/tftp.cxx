@@ -84,12 +84,24 @@ namespace tftp {
 		block = *((uint16_t*)buf+1);
 		if(n_r <= block && block <= n_r+W_T) {
 			if(n_r == block) {
-				n_r++;
 				file.write(buf+4, nread - 2*sizeof(uint16_t));
+
+				int i;
+				for(i = n_r+1; i <= n_r+W_T; ++i) {
+					if(backbuf.find(i) == backbuf.end()) break;
+					std::copy(backbuf[i].begin(), backbuf[i].end(), buf);
+					file.write(buf, backbuf[i].size());
+				}
+
+				n_r = i;
 				if(nread < DATALEN) {
 					file.close();
 					std::cout << "Done" << std::endl;
 				}
+			} else if(backbuf.find(block) == backbuf.end()) {
+				auto back = std::vector<char>();
+				back.assign(buf+4, buf+nread-2*sizeof(uint16_t));
+				backbuf[block] = back;
 			}
 		}
 	}
@@ -182,9 +194,9 @@ namespace tftp {
 				block = 0;
 				file.close();
 			}
-			if(n_t < n_a+W_T && !file.eof() && (n_t < end || end == -1)) { // If we're sending and in window
+			if(n_t < n_a+W_T && !file.eof() && (n_a < end || end == -1)) { // If we're sending and in window
 				sendData();
-			} else if(n_t == n_a+W_T && (n_t < end || end == -1)) { // Else check for timeout
+			} else if(n_t == n_a+W_T && (n_a < end || end == -1)) { // Else check for timeout
 				auto current = std::chrono::steady_clock::now();
 				std::chrono::duration<double> diff = current-last_ack;
 				if(diff.count() > TIMEOUT) {
