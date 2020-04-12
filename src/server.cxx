@@ -11,7 +11,7 @@
 
 namespace tftp {
 	Server::Server() {
-		hints.ai_family = AF_UNSPEC;    // IPv4 or IPv6
+		hints.ai_family = AF_INET | AF_INET6;    // IPv4 or IPv6
 		hints.ai_socktype = SOCK_DGRAM; // UDP
 		hints.ai_flags = AI_PASSIVE;    // For wildcard IP address
 		hints.ai_protocol = 0;          // Any protocol

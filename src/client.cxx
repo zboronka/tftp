@@ -9,7 +9,7 @@
 
 namespace tftp {
 	Client::Client() {
-			hints.ai_family = AF_UNSPEC;    // IPv4 or IPv6
+			hints.ai_family = AF_INET | AF_INET6;    // IPv4 or IPv6
 			hints.ai_socktype = SOCK_DGRAM; // UDP
 			hints.ai_flags = 0;
 			hints.ai_protocol = 0;          // Any protocol
@@ -79,14 +79,17 @@ namespace tftp {
 
 int main(int argc, char **argv) {
 	const char *address = "127.0.0.1";
-	bool ipv4 = true;
 	bool drops = false;
 
 	for(int i = 0; i < argc; i++) {
 		if(strcmp(argv[i], "-a") == 0) {
 			address = argv[i+1];
-		} else if(strcmp(argv[i], "--ipv6") == 0) {
-			ipv4 = false;
+		} else if(strcmp(argv[i], "--ipv6") == 0) { 
+			/********************************************
+			* Argument 'supported' for project purposes,
+			* getaddrinfo will determine packet type
+			* based on provided address.
+			*********************************************/
 		} else if(strcmp(argv[i], "-d") == 0) {
 			drops = true;
 		}
