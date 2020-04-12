@@ -100,7 +100,7 @@ namespace tftp {
 				}
 			} else if(backbuf.find(block) == backbuf.end()) {
 				auto back = std::vector<char>();
-				back.assign(buf+4, buf+nread-2*sizeof(uint16_t));
+				back.assign(buf+4, buf+nread);
 				backbuf[block] = back;
 			}
 		}
