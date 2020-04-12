@@ -108,9 +108,9 @@ int main(int argc, char **argv) {
 	std::cin >> filename;
 
 	if(client.ignoreCaseEqual(command, "GET")) {
-	   	client.sendRRQ(filename.c_str(), tftp::modes[tftp::NETASCII]);
+		client.sendRRQ(filename.c_str(), tftp::modes[tftp::OCTET]);
 	} else {
-	   	client.sendWRQ(filename.c_str(), tftp::modes[tftp::NETASCII]);
+		client.sendWRQ(filename.c_str(), tftp::modes[tftp::OCTET]);
 	}
 	while(!client.done()) {
 		client.sending();
