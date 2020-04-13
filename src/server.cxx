@@ -10,11 +10,11 @@
 #include "server.hxx"
 
 namespace tftp {
-	Server::Server() {
-		hints.ai_family = AF_INET | AF_INET6;    // IPv4 or IPv6
-		hints.ai_socktype = SOCK_DGRAM; // UDP
-		hints.ai_flags = AI_PASSIVE;    // For wildcard IP address
-		hints.ai_protocol = 0;          // Any protocol
+	Server::Server(bool ipv6) {
+		hints.ai_family = ipv6 ? AF_INET6 : AF_INET;    // IPv4 or IPv6
+		hints.ai_socktype = SOCK_DGRAM;                 // UDP
+		hints.ai_flags = AI_PASSIVE;                    // For wildcard IP address
+		hints.ai_protocol = 0;                          // Any protocol
 		hints.ai_canonname = NULL;
 		hints.ai_addr = NULL;
 		hints.ai_next = NULL;
@@ -44,8 +44,14 @@ namespace tftp {
 	}
 }
 
-int main() {
-	auto server = tftp::Server();
+int main(int argc, char **argv) {
+	bool ipv6 = false;
+	for(int i = 0; i < argc; i++) {
+		if(strcmp(argv[i], "--ipv6") == 0) {
+			ipv6 = true;
+		}
+	}
+	auto server = tftp::Server(ipv6);
 	server.establish("2830");
 
 	for(;;) {

@@ -33,7 +33,8 @@ namespace tftp {
 		WRQ,
 		DATA,
 		ACK,
-		ERROR
+		ERROR,
+		OACK
 	};
 
 	struct ack_packet {
@@ -45,8 +46,12 @@ namespace tftp {
 	class Tftp {
 		private:
 			void readFile();
+			uint8_t key = 144;
 
 		protected:
+			void encrypt(char*, int, uint8_t);
+			void decrypt(char*, int, uint8_t);
+
 			bool openRead(const char *filename); 
 			bool openWrite(const char *filename); 
 

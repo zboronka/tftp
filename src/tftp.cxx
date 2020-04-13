@@ -9,6 +9,14 @@
 #include "tftp.hxx"
 
 namespace tftp {
+	void Tftp::encrypt(char* message, int size, uint8_t key) {
+		for(char* i = message; i != message+size; ++i) *i = *i ^ key;
+	}
+
+	void Tftp::decrypt(char* message, int size, uint8_t key) {
+		encrypt(message, size, key);
+	}
+
 	void Tftp::readFile() {
 		std::strcpy(filename,buf+sizeof(uint16_t));
 		std::strcpy(mode,buf+sizeof(uint16_t)+std::strlen(filename)+1);
@@ -45,6 +53,8 @@ namespace tftp {
 			send = false;
 			return;
 		}
+
+		encrypt(data, file.gcount(), key);
 
 		auto packet_size = 2*sizeof(uint16_t)+file.gcount();
 
@@ -84,7 +94,8 @@ namespace tftp {
 		block = *((uint16_t*)buf+1);
 		if(n_r <= block && block <= n_r+W_T) {
 			if(n_r == block) {
-				file.write(buf+4, nread - 2*sizeof(uint16_t));
+				decrypt(buf+2*sizeof(uint16_t), nread-2*sizeof(uint16_t), key);
+				file.write(buf+4, nread-2*sizeof(uint16_t));
 
 				int i;
 				for(i = n_r+1; i <= n_r+W_T; ++i) {
@@ -99,8 +110,9 @@ namespace tftp {
 					std::cout << "Done" << std::endl;
 				}
 			} else if(backbuf.find(block) == backbuf.end()) {
+				decrypt(buf+2*sizeof(uint16_t), nread-2*sizeof(uint16_t), key);
 				auto back = std::vector<char>();
-				back.assign(buf+4, buf+nread);
+				back.assign(buf+2*sizeof(uint16_t), buf+nread);
 				backbuf[block] = back;
 			}
 		}
@@ -109,7 +121,7 @@ namespace tftp {
 	int Tftp::setUp(const char *address, const char *port, const addrinfo hints, bool bindFlag) {
 		int gai, sfd;
 		addrinfo *result;
-		if (gai = getaddrinfo(address, port, &hints, &result) != 0) {
+		if ((gai = getaddrinfo(address, port, &hints, &result)) != 0) {
 			std::cerr << "getaddrinfo: " << gai_strerror(gai) << std::endl;
 			return -1;
 		}
