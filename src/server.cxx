@@ -50,9 +50,20 @@ int main(int argc, char **argv) {
 	for(int i = 0; i < argc; i++) {
 		if(strcmp(argv[i], "--ipv6") == 0) {
 			ipv6 = true;
-		}
-		if(strcmp(argv[i], "-w") == 0) {
+		} else if(strcmp(argv[i], "-w") == 0) {
 			W_T = std::stoi(argv[i+1]);
+		} else if(strcmp(argv[i], "--help") == 0) {
+			std::cout << "Usage: server [OPTIONS]" << std::endl;
+			std::cout.width(18);
+			std::cout << std::left << "--ipv6"
+			          << "Enable IPv6 packet mode" << std::endl;
+			std::cout.width(18);
+			std::cout << std::left << "-w NUMBER"
+			          << "Set window size, default 8" << std::endl;
+			std::cout.width(18);
+			std::cout << std::left << "--help"
+			          << "Display this help message" << std::endl;
+			exit(EXIT_SUCCESS);
 		}
 	}
 	auto server = tftp::Server(ipv6, W_T);

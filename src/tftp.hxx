@@ -1,6 +1,7 @@
 #ifndef TFTP_HXX
 #define TFTP_HXX
 
+#include <sys/types.h>
 #include <sys/socket.h>
 #include <netdb.h>
 #include <fstream>
@@ -91,8 +92,8 @@ namespace tftp {
 
 			sockaddr_storage peer_addr;
 			socklen_t peer_addr_len = sizeof(sockaddr_storage);
-			ssize_t nread;
 
+			ssize_t nread;
 			int sock;
 			addrinfo hints;
 			uint16_t block = 0;

@@ -46,7 +46,6 @@ namespace tftp {
 		delete[] rrq_packet;
 
 		auto fnew = std::string(filename);
-		fnew+=".back";
 		openWrite(fnew.c_str());
 
 		is_sending = false;
@@ -101,6 +100,11 @@ int main(int argc, char **argv) {
 	bool ipv6 = false;
 	bool drops = false;
 	auto W_T = 8;
+	bool get = false;
+	bool put = false;
+
+	std::string command;
+	std::string filename;
 
 	for(int i = 0; i < argc; i++) {
 		if(strcmp(argv[i], "-a") == 0) {
@@ -111,6 +115,30 @@ int main(int argc, char **argv) {
 			drops = true;
 		} else if(strcmp(argv[i], "-w") == 0) {
 			W_T = std::stoi(argv[i+1]);
+		} else if(strcmp(argv[i], "-g") == 0) {
+			get = true;
+			filename = argv[i+1];
+		} else if(strcmp(argv[i], "-p") == 0) {
+			put = true;
+			filename = argv[i+1];
+		} else if(strcmp(argv[i], "--help") == 0) {
+			std::cout << "Usage: client [OPTIONS] ... [-g|-p] FILENAME ... [OPTIONS]" << std::endl;
+			std::cout.width(18);
+			std::cout << std::left << "--ipv6"
+			          << "Enable IPv6 packet mode" << std::endl;
+			std::cout.width(18);
+			std::cout << std::left << "-d"
+			          << "Simulation dropping one percent of packets sent" << std::endl;
+			std::cout.width(18);
+			std::cout << std::left << "-w NUMBER"
+			          << "Set window size, default 8" << std::endl;
+			std::cout.width(18);
+			std::cout << std::left << "[-g|-p] FILENAME"
+			          << "Get or put filename from/to server" << std::endl;
+			std::cout.width(18);
+			std::cout << std::left << "--help"
+			          << "Display this help message" << std::endl;
+			exit(EXIT_SUCCESS);
 		}
 	}
 
@@ -119,22 +147,25 @@ int main(int argc, char **argv) {
 		exit(EXIT_FAILURE);
 	}
 
-	std::string command;
-	std::string filename;
-	std::cout << "Get or put: ";
-	std::cin >> command;
-	std::cout << "Filename: ";
-	std::cin >> filename;
+	auto before = std::chrono::steady_clock::now();
 
-	if(client.ignoreCaseEqual(command, "GET")) {
+	if(!(get ^ put)) {
+		std::cerr << "Need exactly one operation -p or -g" << std::endl;
+		exit(EXIT_FAILURE);
+	} else if(get) {
 		client.sendRRQ(filename.c_str(), tftp::modes[tftp::OCTET]);
-	} else {
+	} else if(put) {
 		client.sendWRQ(filename.c_str(), tftp::modes[tftp::OCTET]);
 	}
+
 	while(!client.done()) {
 		client.sending();
 		client.processPacket();
 	}
+
+	auto after = std::chrono::steady_clock::now();
+	std::chrono::duration<double> diff = after-before;
+	std::cout << diff.count() << std::flush;
 
 	exit(EXIT_SUCCESS);
 }

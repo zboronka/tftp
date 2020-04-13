@@ -1,6 +1,3 @@
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netdb.h>
 #include <iostream>
 #include <unistd.h>
 #include <algorithm>
@@ -124,7 +121,8 @@ namespace tftp {
 				n_r = i;
 				if(nread < DATALEN) {
 					file.close();
-					std::cout << "Done" << std::endl;
+					block = 0;
+					backbuf.clear();
 				}
 			} else if(backbuf.find(block) == backbuf.end()) {
 				decrypt(buf+2*sizeof(uint16_t), nread-2*sizeof(uint16_t), key);
@@ -223,7 +221,6 @@ namespace tftp {
 	void Tftp::sending() {
 		if(send) {
 			if(end == n_a) {
-				std::cout << "Done sending " << end << " blocks" << std::endl;
 				send = false;
 				n_t = 0;
 				n_a = 0;
