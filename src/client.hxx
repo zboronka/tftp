@@ -15,7 +15,7 @@ namespace tftp {
 			ssize_t process();
 
 		public:
-			Client(bool);
+			Client(bool, int);
 			bool establish(const char*, const char*, bool);
 
 			void sendRRQ(const char *, const char *);

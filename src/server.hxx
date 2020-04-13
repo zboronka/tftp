@@ -10,7 +10,7 @@ namespace tftp {
 			ssize_t process();
 
 		public:
-			Server(bool);
+			Server(bool, int);
 			bool establish(const char*);
 	};
 }

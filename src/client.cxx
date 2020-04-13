@@ -8,7 +8,7 @@
 #include "client.hxx"
 
 namespace tftp {
-	Client::Client(bool ipv6) {
+	Client::Client(bool ipv6, int W_T): Tftp(W_T) {
 			hints.ai_family = ipv6 ? AF_INET6 : AF_INET;  // IPv4 or IPv6
 			hints.ai_socktype = SOCK_DGRAM;               // UDP
 			hints.ai_flags = 0;
@@ -26,13 +26,21 @@ namespace tftp {
 	}
 
 	void Client::sendRRQ(const char *filename, const char *mode) {
-		int len_filename = std::strlen(filename);
-		int send_size = sizeof(uint16_t) + len_filename + std::strlen(mode) + 2;
-		char *rrq_packet = new char[send_size];
+		uint8_t ckey = 1+std::rand()%255;
+		key = ckey;
 
-		*(uint16_t*)rrq_packet = RRQ;
-		std::strcpy(rrq_packet+sizeof(uint16_t), filename);
-		std::strcpy(rrq_packet+sizeof(uint16_t)+len_filename+1, mode);
+		auto len_filename = std::strlen(filename);
+		auto len_mode = std::strlen(mode);
+		auto send_size = sizeof(uint16_t) + len_filename + len_mode + sizeof(KEY_OPT) + 4;
+		auto rrq_packet = new char[send_size];
+
+		auto p = rrq_packet;
+		*(uint16_t*)p = RRQ;
+		std::strcpy(p+=sizeof(uint16_t), filename);
+		std::strcpy(p+=len_filename+1, mode);
+		std::strcpy(p+=len_mode+1, KEY_OPT);
+		*(p+=sizeof(KEY_OPT)) = ckey;
+		*++p = '\0';
 
 		write(sock, rrq_packet, send_size);
 		delete[] rrq_packet;
@@ -46,24 +54,35 @@ namespace tftp {
 	}
 
 	void Client::sendWRQ(const char *filename, const char *mode) {
-		int len_filename = std::strlen(filename);
-		int send_size = sizeof(uint16_t) + len_filename + std::strlen(mode) + 2;
+		uint8_t ckey = 1+std::rand()%255;
+		key = ckey;
+
+		auto len_filename = std::strlen(filename);
+		auto len_mode = std::strlen(mode);
+		auto send_size = sizeof(uint16_t) + len_filename + len_mode + sizeof(KEY_OPT) + 4;
 		char *wrq_packet = new char[send_size];
 
-		*(uint16_t*)wrq_packet = WRQ;
-		std::strcpy(wrq_packet+sizeof(uint16_t), filename);
-		std::strcpy(wrq_packet+sizeof(uint16_t)+len_filename+1, mode);
+		auto p = wrq_packet;
+		*(uint16_t*)p = WRQ;
+		std::strcpy(p+=sizeof(uint16_t), filename);
+		std::strcpy(p+=len_filename+1, mode);
+		std::strcpy(p+=len_mode+1, KEY_OPT);
+		*(p+=sizeof(KEY_OPT)) = ckey;
+		*++p = '\0';
 
 		write(sock, wrq_packet, send_size);
 		delete[] wrq_packet;
+
 		openRead(filename);
 
 		is_sending = true;
 		is_receiving = false;
+
+		await = true;
 	}
 
 	void Client::deliver(const void *packet, int size) {
-		if(!drops || rand() % 100) {
+		if(!drops || std::rand() % 100) {
 			write(sock, packet, size);
 		}
 	}
@@ -81,6 +100,7 @@ int main(int argc, char **argv) {
 	const char *address = "127.0.0.1";
 	bool ipv6 = false;
 	bool drops = false;
+	auto W_T = 8;
 
 	for(int i = 0; i < argc; i++) {
 		if(strcmp(argv[i], "-a") == 0) {
@@ -89,10 +109,12 @@ int main(int argc, char **argv) {
 			ipv6 = true;
 		} else if(strcmp(argv[i], "-d") == 0) {
 			drops = true;
+		} else if(strcmp(argv[i], "-w") == 0) {
+			W_T = std::stoi(argv[i+1]);
 		}
 	}
 
-	auto client = tftp::Client(ipv6);
+	auto client = tftp::Client(ipv6, W_T);
 	if(!client.establish(address, "2830", drops)) {
 		exit(EXIT_FAILURE);
 	}

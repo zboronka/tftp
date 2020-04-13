@@ -1,6 +1,8 @@
 #ifndef TFTP_HXX
 #define TFTP_HXX
 
+#include <sys/socket.h>
+#include <netdb.h>
 #include <fstream>
 #include <chrono>
 #include <unordered_map>
@@ -12,6 +14,8 @@ namespace tftp {
 		OCTET,
 		MAIL
 	};
+
+	inline const char KEY_OPT[] = "key";
 
 	inline const char *modes[] = { "NETASCII", "OCTET", "MAIL" };
 
@@ -46,9 +50,10 @@ namespace tftp {
 	class Tftp {
 		private:
 			void readFile();
-			uint8_t key = 144;
 
 		protected:
+			uint8_t key;
+
 			void encrypt(char*, int, uint8_t);
 			void decrypt(char*, int, uint8_t);
 
@@ -59,6 +64,7 @@ namespace tftp {
 
 			void sendData();
 			void sendAck();
+			void sendOAck();
 			void sendError(error_code);
 
 			void receive();
@@ -68,7 +74,7 @@ namespace tftp {
 			std::chrono::time_point<std::chrono::steady_clock> last_ack;
 			static constexpr double TIMEOUT = 0.050; // 50 milliseconds
 
-			static const int W_T = 8;
+			int W_T;
 			uint16_t n_t = 0; // Next packet to transmit
 			uint16_t n_r = 1; // Next packet to receive
 			uint16_t n_a = 0; // Highest ack received
@@ -92,10 +98,12 @@ namespace tftp {
 			uint16_t block = 0;
 			bool send = false;
 			int end = -1;
+			bool await = false;
 
 			std::fstream file;
 
 		public:
+			Tftp(int);
 			int setUp(const char *, const char *, const addrinfo, bool);
 			void processPacket();
 			void sending();

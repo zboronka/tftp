@@ -77,9 +77,26 @@ namespace tftp {
 		deliver(&ack, sizeof(ack_packet));
 	}
 
+	void Tftp::sendOAck() {
+		auto okey = 1+rand()%255;
+		auto oack_size = 2*sizeof(uint16_t) + sizeof(KEY_OPT);
+		auto oack_packet = new char[oack_size];
+
+		auto p = oack_packet;
+		*(uint16_t*)p = OACK;
+		p+=sizeof(uint16_t);
+		std::strcpy(p, KEY_OPT);
+		*(p+sizeof(KEY_OPT)) = okey;
+
+		deliver(oack_packet, oack_size);
+
+		delete[] oack_packet;
+
+		key = okey ^ *(buf+sizeof(uint16_t)+std::strlen(filename)+std::strlen(mode)+2+sizeof(KEY_OPT));
+	}
+
 	void Tftp::sendError(error_code error) {
 		auto ep_size = 2*sizeof(uint16_t)+strlen(errors[error])+1;
-
 		auto error_packet = new char[ep_size];
 
 		*((uint16_t*)error_packet) = ERROR;
@@ -163,13 +180,12 @@ namespace tftp {
 			case RRQ:
 				readFile();
 				openRead(filename);
-				sendData();
-				send = true;
+				sendOAck();
 				break;
 			case WRQ:
 				readFile();
 				openWrite(filename);
-				sendAck();
+				sendOAck();
 				break;
 			case DATA:
 				receive();
@@ -183,6 +199,15 @@ namespace tftp {
 				break;
 			case ERROR:
 				std::cout << buf+2*sizeof(uint16_t) << std::endl;
+				break;
+			case OACK:
+				key ^= *(buf+sizeof(uint16_t)+sizeof(KEY_OPT));
+				if(await) {
+					send = true;
+					sendData();
+				} else {
+					sendAck();
+				}
 				break;
 			default:
 				return;
@@ -218,5 +243,9 @@ namespace tftp {
 				}
 			}
 		}
+	}
+
+	Tftp::Tftp(int W_T): W_T(W_T) {
+		std::srand(std::time(nullptr)); // use current time as seed for random generator
 	}
 }

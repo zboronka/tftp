@@ -10,7 +10,7 @@
 #include "server.hxx"
 
 namespace tftp {
-	Server::Server(bool ipv6) {
+	Server::Server(bool ipv6, int W_T): Tftp(W_T) {
 		hints.ai_family = ipv6 ? AF_INET6 : AF_INET;    // IPv4 or IPv6
 		hints.ai_socktype = SOCK_DGRAM;                 // UDP
 		hints.ai_flags = AI_PASSIVE;                    // For wildcard IP address
@@ -46,12 +46,16 @@ namespace tftp {
 
 int main(int argc, char **argv) {
 	bool ipv6 = false;
+	auto W_T = 8;
 	for(int i = 0; i < argc; i++) {
 		if(strcmp(argv[i], "--ipv6") == 0) {
 			ipv6 = true;
 		}
+		if(strcmp(argv[i], "-w") == 0) {
+			W_T = std::stoi(argv[i+1]);
+		}
 	}
-	auto server = tftp::Server(ipv6);
+	auto server = tftp::Server(ipv6, W_T);
 	server.establish("2830");
 
 	for(;;) {
